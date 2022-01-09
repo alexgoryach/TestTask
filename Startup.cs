@@ -14,6 +14,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using TestTask.Models;
+using TestTask.Services;
+using TestTask.Services.Interfaces;
 
 namespace TestTask
 {
@@ -42,7 +44,9 @@ namespace TestTask
                 })
                 .AddEntityFrameworkStores<ApplicationContext>();
             //
-                 
+            services.AddTransient<IFileService, FileService>();
+            services.AddTransient<IMessageService, MessageService>();
+
             services.AddControllersWithViews();
             
             services.AddControllers();

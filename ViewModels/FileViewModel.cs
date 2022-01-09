@@ -7,7 +7,7 @@ namespace TestTask.ViewModels
     {
         [Required]
         public IFormFile File { get; set; }
-        /*[Required]*/
+        [Required]
         public bool AutoDelete { get; set; }
     }
 }
