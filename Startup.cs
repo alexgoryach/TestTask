@@ -67,6 +67,9 @@ namespace TestTask
             // Connecting authentication and authorization
             app.UseAuthentication(); 
             app.UseAuthorization();
+            
+            // File upload
+            app.UseStaticFiles();
 
             app.UseEndpoints(endpoints =>
             {
