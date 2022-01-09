@@ -19,7 +19,7 @@ namespace TestTask.Controllers
             _signInManager = signInManager;
         }
 
-        [HttpPost("Register")]
+        [HttpPost("[action]")]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
             if(!ModelState.IsValid)
@@ -42,6 +42,29 @@ namespace TestTask.Controllers
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
+            return Ok();
+        }
+        
+        [HttpPost("[action]")]
+        public async Task<IActionResult> Login(LoginViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            var result = 
+                    await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError("", "Incorrect login or/and password");
+            }
+            return Ok();
+        }
+ 
+        [HttpPost("[action]")]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
             return Ok();
         }
     }
