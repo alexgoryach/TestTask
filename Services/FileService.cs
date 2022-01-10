@@ -54,7 +54,8 @@ namespace TestTask.Services
                 {
                     id = MinId;
                 }
-                FileModel fileAddedToDb = new FileModel(id + IdStep, model.File.FileName, userId, Path.GetRandomFileName(), model.AutoDelete);
+                FileModel fileAddedToDb = 
+                    new FileModel(id + IdStep, model.File.FileName, userId, Path.GetRandomFileName(), model.AutoDelete);
                 
                 _db.filesdb.Add(fileAddedToDb);
                 await _db.SaveChangesAsync();
@@ -92,7 +93,8 @@ namespace TestTask.Services
             {
                 try
                 {
-                    var result = await _db.filesdb.Select(c => c).Where(c => c.userId == userId).ToListAsync();
+                    var result = await _db.filesdb.Select(c => c).
+                        Where(c => c.userId == userId).ToListAsync();
                     if (result == null)
                         throw new Exception("No files founded");
                     foreach (var file in result)

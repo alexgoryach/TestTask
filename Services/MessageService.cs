@@ -39,7 +39,8 @@ namespace TestTask.Services
                 {
                     id = MinId;
                 }
-                MessageModel messageAddedToDb = new MessageModel(id + IdStep, model.Message, userId, Guid.NewGuid().ToString(), model.AutoDelete);
+                MessageModel messageAddedToDb = new MessageModel(id + IdStep, model.Message, userId,
+                    Guid.NewGuid().ToString(), model.AutoDelete);
                 
                 _db.messagesdb.Add(messageAddedToDb);
                 await _db.SaveChangesAsync();
@@ -74,24 +75,25 @@ namespace TestTask.Services
         public async Task<List<MessageModel>> GetAllUserMessages(string userId)
         {
             try
+            {
+                var result = await _db.messagesdb.Select(c => c).
+                    Where(c => c.userId == userId).ToListAsync();
+                if (result == null)
+                    throw new Exception("No messages founded");
+                foreach (var message in result)
                 {
-                    var result = await _db.messagesdb.Select(c => c).Where(c => c.userId == userId).ToListAsync();
-                    if (result == null)
-                        throw new Exception("No messages founded");
-                    foreach (var message in result)
+                    if (message.autoDelete)
                     {
-                        if (message.autoDelete)
-                        {
-                            _db.messagesdb.Remove(message);
-                            await _db.SaveChangesAsync();
-                        }
+                        _db.messagesdb.Remove(message);
+                        await _db.SaveChangesAsync();
                     }
-                    return result;
                 }
-                catch (Exception e)
-                {
-                    throw new Exception("Cant get messages");
-                }
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Cant get messages");
+            }
         }
         
         public async Task<string> DeleteMessageByUrl(string url)

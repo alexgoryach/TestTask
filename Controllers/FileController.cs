@@ -23,7 +23,7 @@ namespace TestTask.Controllers
     {
         private readonly IFileService _fileService;
 
-        public FileController(IWebHostEnvironment environment, UserManager<User> userManager, IFileService fileService, FileContext context)
+        public FileController(IFileService fileService)
         {
             _fileService = fileService;
         }

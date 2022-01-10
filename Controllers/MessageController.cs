@@ -15,7 +15,7 @@ namespace TestTask.Controllers
     {
         private readonly IMessageService _messageService;
 
-        public MessageController(IMessageService messageService, MessageContext context)
+        public MessageController(IMessageService messageService)
         {
             _messageService = messageService;
         }
