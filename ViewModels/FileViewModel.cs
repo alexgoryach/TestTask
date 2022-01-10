@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
+using TestTask.Services.Interfaces;
 
 namespace TestTask.ViewModels
 {

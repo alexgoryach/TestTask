@@ -44,6 +44,9 @@ namespace TestTask
                 })
                 .AddEntityFrameworkStores<ApplicationContext>();
             //
+            services.AddDbContext<FileContext>(options =>
+                options.UseNpgsql(Configuration.GetConnectionString("FilesConnection")));
+            
             services.AddTransient<IFileService, FileService>();
             services.AddTransient<IMessageService, MessageService>();
 

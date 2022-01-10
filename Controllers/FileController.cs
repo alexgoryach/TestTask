@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -7,6 +8,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.EntityFrameworkCore;
 using TestTask.Models;
 using TestTask.Services;
 using TestTask.Services.Interfaces;
@@ -19,56 +22,64 @@ namespace TestTask.Controllers
     public class FileController : ControllerBase
     {
         private readonly IFileService _fileService;
-        private static IWebHostEnvironment _environment;
-        private readonly UserManager<User> _userManager;
 
-        public FileController(IWebHostEnvironment environment, UserManager<User> userManager, IFileService fileService)
+        public FileController(IWebHostEnvironment environment, UserManager<User> userManager, IFileService fileService, FileContext context)
         {
-            _environment = environment;
-            _userManager = userManager;
             _fileService = fileService;
         }
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> Post([FromForm]FileViewModel model)
+        public Task<IActionResult> Post([FromForm]FileViewModel model)
         {
             try
             {
-                if (model.File.Length > 0)
-                { 
-                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                        
-                    if (!Directory.Exists(_environment.WebRootPath + "\\UploadFiles\\" + $"{userId}\\"))
-                    {
-                        Directory.CreateDirectory(_environment.WebRootPath + "\\UploadFiles\\" + $"{userId}\\");
-                    }
-                    
-                    using (FileStream fileStream =
-                           System.IO.File.Create(_environment.WebRootPath + "\\UploadFiles\\" + $"{userId}\\" + model.File.FileName))
-                    {
-                        model.File.CopyTo(fileStream);
-                        fileStream.Flush();
-                        var x = Guid.NewGuid() + ".jpeg";
-                        var y = Path.GetRandomFileName() + ".jpeg";
-                        return Ok(model.File.FileName); // TO DO Fix filename
-                    }
-                }
-                else
-                {
-                    return BadRequest("Failed to upload file");
-                }
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var uploadedUrl = _fileService.UploadFile(model, userId);
+                return Task.FromResult<IActionResult>(Ok("Uploaded file link: /" + uploadedUrl.Result));
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message.ToString());
+                return Task.FromResult<IActionResult>(BadRequest(ex.Message.ToString()));
             }
         }
 
-        [HttpGet("{fileName}")]
-        public async Task<IActionResult> Get(string fileName)
+        [HttpGet("{fileUrl}")]
+        [Authorize]
+        public async Task<IActionResult> Get(string fileUrl)
         {
-            return Ok(fileName);
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var filePath = _fileService.GetFileByUrl(userId, fileUrl).Result;
+                var provider = new FileExtensionContentTypeProvider();
+                if (!provider.TryGetContentType(filePath, out var contentType))
+                {
+                    contentType = "application/octet-stream";
+                }
+                var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+                return Ok(File(fileBytes, contentType, Path.GetFileName(filePath)).FileContents);
+            }
+            catch (Exception e)
+            {
+                return BadRequest();
+            }
+        }
+        
+        // Needs correction
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Get()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                return Ok(_fileService.GetAllUserFiles(userId));
+            }
+            catch (Exception e)
+            {
+                return BadRequest();
+            }
         }
     }
 }
