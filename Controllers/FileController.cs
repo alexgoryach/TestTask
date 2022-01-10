@@ -65,8 +65,7 @@ namespace TestTask.Controllers
                 return BadRequest();
             }
         }
-        
-        // Needs correction
+
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> Get()
@@ -74,12 +73,35 @@ namespace TestTask.Controllers
             try
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                return Ok(_fileService.GetAllUserFiles(userId));
+                var files = await _fileService.GetAllUserFiles(userId);
+                return Ok(files);
             }
             catch (Exception e)
             {
                 return BadRequest();
             }
         }
+        
+        // Add anonymous user method
+        /*[HttpGet("{fileUrl}")]
+        public async Task<IActionResult> Get(string fileUrl)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var filePath = _fileService.GetFileByUrl(userId, fileUrl).Result;
+                var provider = new FileExtensionContentTypeProvider();
+                if (!provider.TryGetContentType(filePath, out var contentType))
+                {
+                    contentType = "application/octet-stream";
+                }
+                var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+                return Ok(File(fileBytes, contentType, Path.GetFileName(filePath)).FileContents);
+            }
+            catch (Exception e)
+            {
+                return BadRequest();
+            }
+        }*/
     }
 }

@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using TestTask.Models;
 using TestTask.ViewModels;
 
 namespace TestTask.Services.Interfaces
@@ -9,6 +11,6 @@ namespace TestTask.Services.Interfaces
 
         public Task<string> GetFileByUrl(string userId, string url);
 
-        public Task<string> GetAllUserFiles(string userId);
+        public Task<List<FileModel>> GetAllUserFiles(string userId);
     }
 }

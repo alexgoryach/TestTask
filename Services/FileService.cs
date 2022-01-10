@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
@@ -92,7 +93,7 @@ namespace TestTask.Services
                 return "Path does not exist";
             }
         }
-        public async Task<string> GetAllUserFiles(string userId)
+        public async Task<List<FileModel>> GetAllUserFiles(string userId)
         {
             if (Directory.Exists(_environment.WebRootPath + "\\UploadFiles\\" + $"{userId}\\"))
             {
@@ -100,7 +101,7 @@ namespace TestTask.Services
                 {
                     var result = await _db.filesdb.Select(c => c).Where(c => c.userId == userId).ToListAsync();
                     if (result == null)
-                        return "Files were not found!";
+                        throw new Exception("No files founded");
                     foreach (var file in result)
                     {
                         if (file.autoDelete)
@@ -109,16 +110,16 @@ namespace TestTask.Services
                             await _db.SaveChangesAsync();
                         }
                     }
-                    return result.ToString();
+                    return result;
                 }
                 catch (Exception e)
                 {
-                    return "Error: " + e.Message;
+                    throw new Exception("Cant get files");
                 }
             }
             else
             {
-                return "Path does not exist";
+                throw new Exception("This directory does not exist");
             }
         }
     }
