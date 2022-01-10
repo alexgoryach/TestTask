@@ -45,13 +45,11 @@ namespace TestTask.Controllers
         }
 
         [HttpGet("{fileUrl}")]
-        [Authorize]
         public async Task<IActionResult> Get(string fileUrl)
         {
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var filePath = _fileService.GetFileByUrl(userId, fileUrl).Result;
+                var filePath = _fileService.GetFileByUrl(fileUrl).Result;
                 var provider = new FileExtensionContentTypeProvider();
                 if (!provider.TryGetContentType(filePath, out var contentType))
                 {
@@ -82,26 +80,19 @@ namespace TestTask.Controllers
             }
         }
         
-        // Add anonymous user method
-        /*[HttpGet("{fileUrl}")]
-        public async Task<IActionResult> Get(string fileUrl)
+        [HttpDelete("{fileUrl}")]
+        [Authorize]
+        public async Task<IActionResult> Delete(string fileUrl)
         {
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var filePath = _fileService.GetFileByUrl(userId, fileUrl).Result;
-                var provider = new FileExtensionContentTypeProvider();
-                if (!provider.TryGetContentType(filePath, out var contentType))
-                {
-                    contentType = "application/octet-stream";
-                }
-                var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
-                return Ok(File(fileBytes, contentType, Path.GetFileName(filePath)).FileContents);
+                var deleteResult = await _fileService.DeleteFileByUrl(fileUrl);
+                return Ok(deleteResult);
             }
             catch (Exception e)
             {
                 return BadRequest();
             }
-        }*/
+        }
     }
 }

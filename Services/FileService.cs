@@ -66,31 +66,24 @@ namespace TestTask.Services
             }
         }
 
-        public async Task<string> GetFileByUrl(string userId, string url)
+        public async Task<string> GetFileByUrl(string url)
         {
-            if (Directory.Exists(_environment.WebRootPath + "\\UploadFiles\\" + $"{userId}\\"))
+            try
             {
-                try
+                var file = await _db.filesdb.FirstOrDefaultAsync(x => x.url == url);
+                if (file == null)
+                    return "File not found!";
+                var userId = file.userId;
+                if (file.autoDelete)
                 {
-                    var file = await _db.filesdb.FirstOrDefaultAsync(x => x.url == url);
-                    if (file == null)
-                        return "File not found!";
-                    if (file.autoDelete)
-                    {
-                        _db.filesdb.Remove(file);
-                        await _db.SaveChangesAsync();
-                    }
-
-                    return _environment.WebRootPath + "\\UploadFiles\\" + $"{userId}\\" + file.name;
+                    _db.filesdb.Remove(file);
+                    await _db.SaveChangesAsync();
                 }
-                catch (Exception e)
-                {
-                    return "Error: " + e.Message;
-                }
+                return _environment.WebRootPath + "\\UploadFiles\\" + $"{userId}\\" + file.name;
             }
-            else
+            catch (Exception e)
             {
-                return "Path does not exist";
+                return "Error: " + e.Message;
             }
         }
         public async Task<List<FileModel>> GetAllUserFiles(string userId)
@@ -120,6 +113,28 @@ namespace TestTask.Services
             else
             {
                 throw new Exception("This directory does not exist");
+            }
+        }
+        
+        public async Task<string> DeleteFileByUrl(string url)
+        {
+            try
+            {
+                var file = await _db.filesdb.FirstOrDefaultAsync(x => x.url == url);
+                if (file == null)
+                    return "File not found!";
+                var userId = file.userId;
+                
+                _db.filesdb.Remove(file);
+                await _db.SaveChangesAsync();
+                
+                System.IO.File.Delete(_environment.WebRootPath + "\\UploadFiles\\" + $"{userId}\\" + file.name);
+                
+                return "File " + file.name + " has been deleted";
+            }
+            catch (Exception e)
+            {
+                return "Error: " + e.Message;
             }
         }
     }

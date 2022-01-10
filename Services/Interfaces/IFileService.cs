@@ -9,8 +9,10 @@ namespace TestTask.Services.Interfaces
     {
         public Task<string> UploadFile(FileViewModel model, string userId);
 
-        public Task<string> GetFileByUrl(string userId, string url);
+        public Task<string> GetFileByUrl(string url);
 
         public Task<List<FileModel>> GetAllUserFiles(string userId);
+
+        public Task<string> DeleteFileByUrl(string url);
     }
 }
