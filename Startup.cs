@@ -47,6 +47,9 @@ namespace TestTask
             services.AddDbContext<FileContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("FilesConnection")));
             
+            services.AddDbContext<MessageContext>(options =>
+                options.UseNpgsql(Configuration.GetConnectionString("MessagesConnection")));
+
             services.AddTransient<IFileService, FileService>();
             services.AddTransient<IMessageService, MessageService>();
 
